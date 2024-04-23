@@ -49,37 +49,22 @@ trait RDValidators extends Validators
 
   implicit val hpoTermNode: Path.Node[HPOTerm] =
     Path.Node("HPO-Term")
-/*
-  implicit val performanceStatusNode: Path.Node[PerformanceStatus] =
-    Path.Node("Performance-Status")
-
-  implicit val tumorSpecimenNode: Path.Node[TumorSpecimen] =
-    Path.Node("Tumor-Probe")
-
-  implicit val tumorCellContentNode: Path.Node[TumorCellContent] =
-    Path.Node("Tumor-Zellgehalt")
-
-  implicit val tumorMorphologyNode: Path.Node[TumorMorphology] =
-    Path.Node("Tumor-Morphologie")
-
-  implicit val histologyReportNode: Path.Node[HistologyReport] =
-    Path.Node("Histologie-Bericht")
-
-  implicit val ngsReportNode: Path.Node[NGSReport] =
-    Path.Node("NGS-Bericht")
-*/
 
   implicit val variantNode: Path.Node[Variant] =
     Path.Node("Variante")
 
   implicit val smallVariantNode: Path.Node[SmallVariant] =
-    Path.Node("Einfache Variante")
+    Path.Node("Einfache-Variante")
 
   implicit val structuralVariantNode: Path.Node[StructuralVariant] =
     Path.Node("Struktur-Variante")
 
   implicit val cnvNode: Path.Node[CopyNumberVariant] =
-    Path.Node("CopyNumberVariant")
+    Path.Node("CNV")
+
+  implicit val ngsReportNode: Path.Node[RDNGSReport] =
+    Path.Node("NGS-Bericht")
+
 
 
   implicit val hgnc: CodeSystemProvider[HGNC,Id,Applicative[Id]]
@@ -113,20 +98,31 @@ trait RDValidators extends Validators
     ObservationValidator[HPOTerm]
 
 
- def VariantValidator[V <: Variant: Path.Node](
+
+ implicit def VariantValidator[V <: Variant: Path.Node](
     implicit patient: Patient
   ): Validator[Issue,V] =
     variant =>
       (
         validate(variant.patient) at "Patient",
-        ifDefined(variant.proteinChange.map(_.code.value))(
-          code => code must matchRegex (HGVS.Protein.threeLetterAA) otherwise (
-            Error(s"Ungültiger Code '$code', erwarte 3-Buchstaben-Format") at "Amino-Säure-Austausch"
-          )
-        )
+        ifDefined(variant.genes.map(_.toList))(validateEach(_)) at "Gen(e)",
+        validateOpt(variant.proteinChange)
       )
       .errorsOr(variant) on variant
 
+      
+ implicit def ngsReportValidator(
+    implicit patient: Patient
+  ): Validator[Issue,RDNGSReport] =
+    ngs =>
+      (
+        validate(ngs.patient) at "Patient",
+        ngs.variants must be (nonEmpty) otherwise (Warning("Fehlende Angabe") at "Varianten"),
+        ifDefined(ngs.smallVariants)(validateEach(_)),
+        ifDefined(ngs.structuralVariants)(validateEach(_)),
+        ifDefined(ngs.copyNumberVariants)(validateEach(_))
+      )
+      .errorsOr(ngs) on ngs
 
 
 
@@ -139,7 +135,8 @@ trait RDValidators extends Validators
       (  
         validate(patient),
         validate(record.diagnosis),
-        validateEach(record.hpoTerms)
+        validateEach(record.hpoTerms),
+        ifDefined(record.ngsReports)(validateEach(_))
       )
       .errorsOr(record)
 

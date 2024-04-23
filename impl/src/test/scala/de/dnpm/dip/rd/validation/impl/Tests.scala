@@ -48,7 +48,9 @@ class Tests extends AsyncFlatSpec with Invalidators
   "Validation of invalidated RDPatientRecord" must "have failed" in {
 
     (service ! Validate(record)).map {
-      case Left(_) => succeed
+      case Left(UnacceptableIssuesDetected(report)) =>
+        toJson(report) pipe prettyPrint pipe println
+        succeed
 
       case r => fail()
     }
