@@ -14,7 +14,10 @@ import de.ekut.tbi.generators.Gen
 import de.dnpm.dip.rd.model.RDPatientRecord
 import de.dnpm.dip.rd.validation.api.RDValidationService
 import de.dnpm.dip.service.Data._
-import de.dnpm.dip.service.validation.ValidationService.Validate
+import de.dnpm.dip.service.validation.ValidationService.{
+  Validate,
+  Filter
+}
 import de.dnpm.dip.rd.gens.Generators._
 import play.api.libs.json.Json.{ 
   toJson,
@@ -47,13 +50,20 @@ class Tests extends AsyncFlatSpec with Invalidators
 
   "Validation of invalidated RDPatientRecord" must "have failed" in {
 
-    (service ! Validate(record)).map {
-      case Left(UnacceptableIssuesDetected(report)) =>
-        toJson(report) pipe prettyPrint pipe println
-        succeed
+    for {
+      outcome <- (service ! Validate(record))
 
-      case r => fail()
-    }
+      result <-
+        outcome match {
+          case Left(UnacceptableIssuesDetected(report)) =>
+            toJson(report) pipe prettyPrint pipe println
+            for {
+              infos <- service ? Filter.empty
+            } yield infos must not be (empty)
+
+          case r => fail()
+       }
+    } yield result
 
   }
 
