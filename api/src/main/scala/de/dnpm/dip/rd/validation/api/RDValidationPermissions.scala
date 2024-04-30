@@ -2,7 +2,10 @@ package de.dnpm.dip.rd.validation.api
 
 
 import de.dnpm.dip.service.auth._
-import de.dnpm.dip.service.validation.ValidationPermissions
+import de.dnpm.dip.service.validation.{
+  ValidationPermissions,
+  ValidationRoles
+}
 
 
 
@@ -16,20 +19,7 @@ class RDValidationPermissionsSPI extends PermissionsSPI
 }
 
 
-
-object RDValidationRoles extends Roles
-{
-
-  val BasicRDMember =
-    Role(
-      "RD-Documentarist",
-      RDValidationPermissions.permissions
-    )
-
-  override val roles: Set[Role] =
-    Set(BasicRDMember)
-
-}
+object RDValidationRoles extends ValidationRoles("RD",RDValidationPermissions)
 
 
 class RDValidationRolesSPI extends RolesSPI
