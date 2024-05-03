@@ -86,7 +86,7 @@ trait RDValidators extends Validators
         validate(diagnosis.patient) at "Patient",
         validateEach(diagnosis.categories) at "Krankheits-Kategorie",
         diagnosis.onsetAge must be (defined) otherwise (
-          Warning("Fehlende Angabe") at "Alter der Erstmanifestation"
+          MissingValue("Alter der Erstmanifestation")
         )
       )
       .errorsOr(diagnosis) on diagnosis
@@ -117,7 +117,7 @@ trait RDValidators extends Validators
     ngs =>
       (
         validate(ngs.patient) at "Patient",
-        ngs.variants must be (nonEmpty) otherwise (Warning("Fehlende Angabe") at "Varianten"),
+        ngs.variants must be (nonEmpty) otherwise (MissingResult("Varianten")),
         ifDefined(ngs.smallVariants)(validateEach(_)),
         ifDefined(ngs.structuralVariants)(validateEach(_)),
         ifDefined(ngs.copyNumberVariants)(validateEach(_))
