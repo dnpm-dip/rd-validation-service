@@ -19,7 +19,7 @@ class RDValidationPermissionsSPI extends PermissionsSPI
 }
 
 
-object RDValidationRoles extends ValidationRoles("RD",RDValidationPermissions)
+object RDValidationRoles extends ValidationRoles(RDValidationPermissions)
 
 
 class RDValidationRolesSPI extends RolesSPI
