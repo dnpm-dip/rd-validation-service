@@ -50,7 +50,9 @@ lazy val impl = project
       dependencies.hpo,
       dependencies.omim,
       dependencies.orphanet,
-      dependencies.hgnc
+      dependencies.hgnc,
+      dependencies.atc_impl,
+      dependencies.atc_catalogs
     )
   )
   .dependsOn(
@@ -65,16 +67,18 @@ lazy val impl = project
 
 lazy val dependencies =
   new {
-    val scalatest      = "org.scalatest"  %% "scalatest"           % "3.2.17" % Test
-    val service_base   = "de.dnpm.dip"    %% "service-base"        % "1.0-SNAPSHOT"
-    val rd_model       = "de.dnpm.dip"    %% "rd-dto-model"        % "1.0-SNAPSHOT"
-    val rd_generators  = "de.dnpm.dip"    %% "rd-dto-generators"   % "1.0-SNAPSHOT" % Test
-    val icd10gm        = "de.dnpm.dip"    %% "icd10gm-impl"        % "1.0-SNAPSHOT" % Test
-    val icd_catalogs   = "de.dnpm.dip"    %% "icd-claml-packaged"  % "1.0-SNAPSHOT" % Test
-    val hgnc           = "de.dnpm.dip"    %% "hgnc-gene-set-impl"  % "1.0-SNAPSHOT" % Test
-    val hpo            = "de.dnpm.dip"    %% "hp-ontology"         % "1.0-SNAPSHOT" % Test
-    val omim           = "de.dnpm.dip"    %% "omim-catalog"        % "1.0-SNAPSHOT" % Test
-    val orphanet       = "de.dnpm.dip"    %% "orphanet-ordo"       % "1.0-SNAPSHOT" % Test
+    val scalatest      = "org.scalatest"  %% "scalatest"              % "3.2.17" % Test
+    val service_base   = "de.dnpm.dip"    %% "service-base"           % "1.0-SNAPSHOT"
+    val rd_model       = "de.dnpm.dip"    %% "rd-dto-model"           % "1.0-SNAPSHOT"
+    val rd_generators  = "de.dnpm.dip"    %% "rd-dto-generators"      % "1.0-SNAPSHOT" % Test
+    val icd10gm        = "de.dnpm.dip"    %% "icd10gm-impl"           % "1.0-SNAPSHOT" % Test
+    val icd_catalogs   = "de.dnpm.dip"    %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
+    val hgnc           = "de.dnpm.dip"    %% "hgnc-gene-set-impl"     % "1.0-SNAPSHOT" % Test
+    val hpo            = "de.dnpm.dip"    %% "hp-ontology"            % "1.0-SNAPSHOT" % Test
+    val omim           = "de.dnpm.dip"    %% "omim-catalog"           % "1.0-SNAPSHOT" % Test
+    val orphanet       = "de.dnpm.dip"    %% "orphanet-ordo"          % "1.0-SNAPSHOT" % Test
+    val atc_impl       = "de.dnpm.dip"    %% "atc-impl"               % "1.0-SNAPSHOT" % Test
+    val atc_catalogs   = "de.dnpm.dip"    %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
   }
 
 
