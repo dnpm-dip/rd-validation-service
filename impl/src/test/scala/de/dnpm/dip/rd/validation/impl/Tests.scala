@@ -10,14 +10,14 @@ import cats.{
   Applicative,
   Id
 }
-import de.ekut.tbi.generators.Gen
-import de.dnpm.dip.rd.model.RDPatientRecord
-import de.dnpm.dip.rd.validation.api.RDValidationService
-import de.dnpm.dip.service.Data._
 import de.dnpm.dip.service.validation.ValidationService.{
   Validate,
+  UnacceptableIssuesDetected,
   Filter
 }
+import de.dnpm.dip.rd.model.RDPatientRecord
+import de.dnpm.dip.rd.validation.api.RDValidationService
+import de.ekut.tbi.generators.Gen
 import de.dnpm.dip.rd.gens.Generators._
 import play.api.libs.json.Json.{ 
   toJson,
