@@ -5,11 +5,6 @@ import scala.util.Random
 import scala.util.chaining._
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.must.Matchers._
-import org.scalatest.Inspectors._
-import cats.{
-  Applicative,
-  Id
-}
 import de.dnpm.dip.service.validation.ValidationService.{
   Validate,
   UnacceptableIssuesDetected,
@@ -61,7 +56,7 @@ class Tests extends AsyncFlatSpec with Invalidators
               infos <- service ? Filter.empty
             } yield infos must not be (empty)
 
-          case r => fail()
+          case _ => fail()
        }
     } yield result
 

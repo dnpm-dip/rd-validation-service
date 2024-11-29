@@ -30,7 +30,7 @@ object RDValidationRepository extends SPILoader[RDValidationRepositoryProvider]
   override def getInstance =
     super.getInstance // Load implementation from runtime context (e.g. test implementation)...
       .recover {      // ... else default to file system-backed repo
-        case t =>
+        case _ =>
           Option(System.getProperty(dataDirProp)) match {
             case Some(dir) =>
               val validationDir = new File(s"$dir/rd_data/validation")
