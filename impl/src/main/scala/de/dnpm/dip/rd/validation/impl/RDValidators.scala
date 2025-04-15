@@ -7,7 +7,10 @@ import cats.{
 }
 import de.ekut.tbi.validation.Validator
 import de.ekut.tbi.validation.dsl._
-import de.dnpm.dip.coding.CodeSystemProvider
+import de.dnpm.dip.coding.{
+  Coding,
+  CodeSystemProvider
+}
 import de.dnpm.dip.coding.icd.ICD10GM
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.model.Patient
@@ -16,7 +19,10 @@ import de.dnpm.dip.service.validation.{
   Validators
 }
 import de.dnpm.dip.rd.model._
-import Issue.Path
+import Issue.{
+  Error,
+  Path
+}
 
 
 trait RDValidators extends Validators
@@ -48,7 +54,7 @@ trait RDValidators extends Validators
 
   implicit val icd10gm: CodeSystemProvider[ICD10GM,Id,Applicative[Id]]
 
-  implicit val omim: CodeSystemProvider[OMIM,Id,Applicative[Id]]
+  implicit val alphaIdSE: CodeSystemProvider[AlphaIDSE,Id,Applicative[Id]]
 
   implicit val orphanet: CodeSystemProvider[Orphanet,Id,Applicative[Id]]
 
@@ -59,22 +65,25 @@ trait RDValidators extends Validators
     diagnosis =>
       (
         validate(diagnosis.patient) at "Patient",
-        validateEach(diagnosis.categories) at "Krankheits-Kategorie",
-        diagnosis.onsetAge must be (defined) otherwise (
-          MissingValue("Alter der Erstmanifestation")
-        )
+        (diagnosis.codes.map(_.system) must contain (allOf (Coding.System.UriSet[RDDiagnosis.Systems].values))) orElse (
+          diagnosis.missingCodeReason must be (defined)
+        ) otherwise (
+          Error("Es muss ein ICD-10-GM, Orphanet und Alpha-ID-SE-Code definiert sein, oder als Grund explizit angegeben sein, dass kein passender code existiert")
+        ) andThen (
+          _ => validateEach(diagnosis.codes)
+        ) at "Diagnose-Codes"
       )
       .errorsOr(diagnosis) on diagnosis
 
 
- implicit def hpoTermValidator(
+  implicit def hpoTermValidator(
     implicit patient: Patient
   ): Validator[Issue,HPOTerm] =
     ObservationValidator[HPOTerm]
 
 
 
- implicit def VariantValidator[V <: Variant: Path.Node](
+  implicit def VariantValidator[V <: Variant: Path.Node](
     implicit patient: Patient
   ): Validator[Issue,V] =
     variant =>
@@ -93,14 +102,29 @@ trait RDValidators extends Validators
       (
         validate(ngs.patient) at "Patient",
         ngs.variants must be (nonEmpty) otherwise (MissingResult("Varianten")),
-        ifDefined(ngs.smallVariants)(validateEach(_)),
-        ifDefined(ngs.structuralVariants)(validateEach(_)),
-        ifDefined(ngs.copyNumberVariants)(validateEach(_))
+        ifDefined(ngs.results.flatMap(_.smallVariants))(validateEach(_)),
+        ifDefined(ngs.results.flatMap(_.structuralVariants))(validateEach(_)),
+        ifDefined(ngs.results.flatMap(_.copyNumberVariants))(validateEach(_))
       )
       .errorsOr(ngs) on ngs
 
 
 
+  val patientRecordValidator: Validator[Issue,RDPatientRecord] =
+    PatientRecordValidator[RDPatientRecord] combineWith {
+      record =>
+    
+        implicit val patient = record.patient
+    
+        (  
+          validateEach(record.diagnoses),
+          validateEach(record.hpoTerms),
+          ifDefined(record.ngsReports)(validateEach(_))
+        )
+        .errorsOr(record)
+    }
+
+/*
   val patientRecordValidator: Validator[Issue,RDPatientRecord] = {
     record =>
 
@@ -109,13 +133,13 @@ trait RDValidators extends Validators
 
       (  
         validate(patient),
-        validate(record.diagnosis),
+        validateEach(record.diagnoses),
         validateEach(record.hpoTerms),
         ifDefined(record.ngsReports)(validateEach(_))
       )
       .errorsOr(record)
-
   }
+*/
 
 }
 
@@ -137,9 +161,9 @@ object RDValidators extends RDValidators
       .getInstance[Id]
       .get
 
-  override implicit lazy val omim: CodeSystemProvider[OMIM,Id,Applicative[Id]] =
-    OMIM.Catalog
-      .getInstance[Id]
+  override implicit lazy val alphaIdSE: CodeSystemProvider[AlphaIDSE,Id,Applicative[Id]] =
+    AlphaIDSE.Catalogs
+      .getInstance[cats.Id]
       .get
 
   override implicit lazy val orphanet: CodeSystemProvider[Orphanet,Id,Applicative[Id]] =

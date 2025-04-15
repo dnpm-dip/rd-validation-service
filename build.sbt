@@ -6,7 +6,7 @@
 
 name := "rd-validation-service"
 ThisBuild / organization := "de.dnpm.dip"
-ThisBuild / scalaVersion := "2.13.13"
+ThisBuild / scalaVersion := "2.13.16"
 ThisBuild / version      := "1.0-SNAPSHOT"
 
 
@@ -48,8 +48,8 @@ lazy val impl = project
       dependencies.icd10gm,
       dependencies.icd_catalogs,
       dependencies.hpo,
-      dependencies.omim,
       dependencies.orphanet,
+      dependencies.alpha_id_se,
       dependencies.hgnc,
       dependencies.atc_impl,
       dependencies.atc_catalogs
@@ -75,8 +75,8 @@ lazy val dependencies =
     val icd_catalogs   = "de.dnpm.dip"    %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
     val hgnc           = "de.dnpm.dip"    %% "hgnc-gene-set-impl"     % "1.0-SNAPSHOT" % Test
     val hpo            = "de.dnpm.dip"    %% "hp-ontology"            % "1.0-SNAPSHOT" % Test
-    val omim           = "de.dnpm.dip"    %% "omim-catalog"           % "1.0-SNAPSHOT" % Test
     val orphanet       = "de.dnpm.dip"    %% "orphanet-ordo"          % "1.0-SNAPSHOT" % Test
+    val alpha_id_se    = "de.dnpm.dip"    %% "alpha-id-se"            % "1.0-SNAPSHOT" % Test
     val atc_impl       = "de.dnpm.dip"    %% "atc-impl"               % "1.0-SNAPSHOT" % Test
     val atc_catalogs   = "de.dnpm.dip"    %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
   }

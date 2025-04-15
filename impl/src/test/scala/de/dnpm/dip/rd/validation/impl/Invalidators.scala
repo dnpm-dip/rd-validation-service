@@ -1,11 +1,8 @@
 package de.dnpm.dip.rd.validation.impl
 
 
-
-import de.dnpm.dip.coding.{
-  Code,
-  Coding
-}
+import java.time.LocalDate
+import de.dnpm.dip.coding.Code
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.model.Patient
 import de.dnpm.dip.rd.model._
@@ -16,14 +13,13 @@ trait Invalidators
 
   def invalidate(patient: Patient) =
     patient.copy(
-      dateOfDeath = None,
-      healthInsurance = None
+      birthDate = LocalDate.now.minusYears(135)
     )
 
   def invalidate(diag: RDDiagnosis): RDDiagnosis =
     diag.copy(
-      categories = diag.categories.map(
-        coding => coding.copy(code = Code[RDDiagnosis.Category]("xxxxx"))
+      codes = diag.codes.map(
+        coding => coding.copy(code = Code[RDDiagnosis.Systems]("xxxxx"))
       )
     )
 
@@ -32,11 +28,15 @@ trait Invalidators
 
     def invalidate(v: SmallVariant): SmallVariant =
       v.copy(
-        proteinChange = v.proteinChange.map(_ => Coding[HGVS.Protein]("G12C"))
+        proteinChange = v.proteinChange.map(_ => Code[HGVS.Protein]("G12C"))
       )
 
     ngs.copy(
-      smallVariants = ngs.smallVariants.map(_.map(invalidate))
+      results = ngs.results.map(
+        r => r.copy(
+          smallVariants = r.smallVariants.map(_.map(invalidate))
+        )
+      )
     )
 
   }
@@ -45,7 +45,7 @@ trait Invalidators
   def invalidate(record: RDPatientRecord): RDPatientRecord =
     record.copy(
       patient = invalidate(record.patient),
-      diagnosis = invalidate(record.diagnosis),
+      diagnoses = record.diagnoses.map(invalidate),
       ngsReports = record.ngsReports.map(_.map(invalidate))
     )
 
