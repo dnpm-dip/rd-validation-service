@@ -11,6 +11,7 @@ import de.dnpm.dip.coding.{
   Coding,
   CodeSystemProvider
 }
+import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.icd.ICD10GM
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.model.Patient
@@ -46,7 +47,11 @@ trait RDValidators extends Validators
   implicit val ngsReportNode: Path.Node[RDNGSReport] =
     Path.Node("NGS-Bericht")
 
+  implicit val carePlanNode: Path.Node[RDCarePlan] =
+    Path.Node("Board-Beschluss")
 
+
+  implicit val atc: CodeSystemProvider[ATC,Id,Applicative[Id]]
 
   implicit val hgnc: CodeSystemProvider[HGNC,Id,Applicative[Id]]
 
@@ -95,7 +100,7 @@ trait RDValidators extends Validators
       .errorsOr(variant) on variant
 
       
- implicit def ngsReportValidator(
+  implicit def ngsReportValidator(
     implicit patient: Patient
   ): Validator[Issue,RDNGSReport] =
     ngs =>
@@ -109,42 +114,84 @@ trait RDValidators extends Validators
       .errorsOr(ngs) on ngs
 
 
+  implicit def carePlanValidator(
+    implicit
+    patient: Patient,
+    ngsReports: Seq[RDNGSReport]
+  ): Validator[Issue,RDCarePlan] = {
+
+    implicit val variants =
+      ngsReports.flatMap(_.variants)
+
+    implicit val therapyRecommendationValidator =
+      RecommendationValidator[RDTherapyRecommendation] combineWith {
+        rec =>
+          ifDefined(rec.medication.map(_.toList))(validateEach(_) at "Medikation")
+            .map(_ => rec)
+      }
+
+    carePlan =>
+      (
+        validate(carePlan.patient) at "Patient",
+        ifDefined(carePlan.therapyRecommendations)(validateEach(_)),
+        ifDefined(carePlan.studyEnrollmentRecommendations)(validateEach(_))
+      )
+      .errorsOr(carePlan) on carePlan
+
+  }
+
+  implicit def TherapyValidator(
+    implicit
+    patient: Patient,
+    recommendations: Iterable[RDTherapyRecommendation]
+  ): Validator[Issue,RDTherapy] =
+    therapy =>
+      (
+        validate(therapy.patient) at "Patient",
+        validateOpt(therapy.basedOn) at "Therapie-Empfehlung",
+        therapy.period must be (defined) otherwise (MissingValue("Zeitraum")),
+        therapy.category must be (defined) otherwise (MissingValue("Therapie-Kategorie")),
+        therapy.`type` must be (defined) otherwise (MissingValue("Therapie-Art")),
+        ifDefined(therapy.medication.map(_.toList))(validateEach(_) at "Medikation")
+
+      )
+      .errorsOr(therapy) on therapy
+
+
 
   val patientRecordValidator: Validator[Issue,RDPatientRecord] =
     PatientRecordValidator[RDPatientRecord] combineWith {
       record =>
     
-        implicit val patient = record.patient
-    
+        implicit val patient =
+          record.patient
+   
+        implicit val ngsReports =
+          record.ngsReports.getOrElse(List.empty)
+
+        implicit val recommendations =
+          record.carePlans.getOrElse(List.empty)
+            .flatMap(_.therapyRecommendations.getOrElse(List.empty))
+
         (  
           validateEach(record.diagnoses),
           validateEach(record.hpoTerms),
-          ifDefined(record.ngsReports)(validateEach(_))
+          ifDefined(record.ngsReports)(validateEach(_)),
+          ifDefined(record.carePlans)(validateEach(_)),
+          ifDefined(record.therapies.map(_.flatMap(_.history.toList)))(validateEach(_))
         )
         .errorsOr(record)
     }
-
-/*
-  val patientRecordValidator: Validator[Issue,RDPatientRecord] = {
-    record =>
-
-      implicit val patient =
-        record.patient
-
-      (  
-        validate(patient),
-        validateEach(record.diagnoses),
-        validateEach(record.hpoTerms),
-        ifDefined(record.ngsReports)(validateEach(_))
-      )
-      .errorsOr(record)
-  }
-*/
 
 }
 
 object RDValidators extends RDValidators
 {
+
+  override implicit lazy val atc: CodeSystemProvider[ATC,Id,Applicative[Id]] =
+    ATC.Catalogs
+      .getInstance[Id]
+      .get
 
   override implicit lazy val hgnc: CodeSystemProvider[HGNC,Id,Applicative[Id]] =
     HGNC.GeneSet
