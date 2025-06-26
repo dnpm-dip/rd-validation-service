@@ -170,14 +170,14 @@ trait RDValidators extends Validators
           record.ngsReports.getOrElse(List.empty)
 
         implicit val recommendations =
-          record.carePlans.getOrElse(List.empty)
+          record.getCarePlans
             .flatMap(_.therapyRecommendations.getOrElse(List.empty))
 
         (  
           validateEach(record.diagnoses),
           validateEach(record.hpoTerms),
           ifDefined(record.ngsReports)(validateEach(_)),
-          ifDefined(record.carePlans)(validateEach(_)),
+          record.carePlans.validateEach,
           ifDefined(record.therapies.map(_.flatMap(_.history.toList)))(validateEach(_))
         )
         .errorsOr(record)
