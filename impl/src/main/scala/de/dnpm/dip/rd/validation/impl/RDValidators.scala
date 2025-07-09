@@ -178,7 +178,27 @@ trait RDValidators extends Validators
           validateEach(record.hpoTerms),
           ifDefined(record.ngsReports)(validateEach(_)),
           record.carePlans.validateEach,
-          ifDefined(record.therapies.map(_.flatMap(_.history.toList)))(validateEach(_))
+          ifDefined(record.therapies.map(_.flatMap(_.history.toList)))(validateEach(_)),
+          ifDefined(record.followUps.filter(_.nonEmpty)){
+            followUps =>
+              val gmfcs = record.gmfcsStatus.getOrElse(List.empty) 
+              (
+                gmfcs must have (size (greaterThanOrEqual (followUps.size))) otherwise (
+                  Error(s"Es sind ${followUps.size} Follow-ups deklariert, aber nur ${gmfcs.size} GMFCS-Status-Werte vorhanden: Bei jedem FU muss der GMFCS erfasst worden sein.")
+                    at "GMFCS-Status"
+                ),
+                record.hpoTerms.validateEach {
+                  hpoTerm =>
+                    (
+                      hpoTerm.status.map(_.history.size).getOrElse(0) must be (greaterThanOrEqual (followUps.size - 1)) otherwise (
+                        Error(s"Beim jedem Follow-up muss für HPO-Terme (sofern nicht neu dazugekommen) der Veränderungs-Status erfasst worden sein, aber es kommen weniger als ${followUps.size-1} erwartete Werte vor") at "Status-Historie"
+                      )
+                    )
+                    .map(_ => hpoTerm) on hpoTerm
+                } 
+              )
+              .errorsOr(followUps)
+          },
         )
         .errorsOr(record)
     }

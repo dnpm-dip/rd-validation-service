@@ -5,6 +5,7 @@ import scala.util.Random
 import scala.util.chaining._
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.must.Matchers._
+import de.dnpm.dip.service.DataUpload
 import de.dnpm.dip.service.validation.ValidationService.{
   Validate,
   UnacceptableIssuesDetected,
@@ -46,7 +47,7 @@ class Tests extends AsyncFlatSpec with Invalidators
   "Validation of invalidated RDPatientRecord" must "have failed" in {
 
     for {
-      outcome <- (service ! Validate(record))
+      outcome <- (service ! Validate(DataUpload(record,None)))
 
       result <-
         outcome match {
