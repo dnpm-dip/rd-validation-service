@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/dnpm-dip/rd-validation-service/compare/v1.0.2...v1.0.3) (2025-08-21)
+
+
+### Bug Fixes
+
+* Updated service-base version ([9a6cd22](https://github.com/dnpm-dip/rd-validation-service/commit/9a6cd2278ad899c16494fc13de95f37ad2885612))
+
 ## [1.0.2](https://github.com/dnpm-dip/rd-validation-service/compare/v1.0.1...v1.0.2) (2025-08-19)
 
 
