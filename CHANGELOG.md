@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/dnpm-dip/rd-validation-service/compare/v1.0.3...v1.0.4) (2025-09-08)
+
+
+### Bug Fixes
+
+* Removed validation enforcing GMFCS status in follow-ups, as it is not always defined; Upgraded service-base version ([bc7706b](https://github.com/dnpm-dip/rd-validation-service/commit/bc7706b93b8ede586f65cd98f1cd9fdf1e5917ec))
+
 ## [1.0.3](https://github.com/dnpm-dip/rd-validation-service/compare/v1.0.2...v1.0.3) (2025-08-21)
 
 
