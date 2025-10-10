@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/dnpm-dip/rd-validation-service/compare/v1.1.0...v1.1.1) (2025-10-10)
+
+
+### Bug Fixes
+
+* Added missing source file ([bb4fcec](https://github.com/dnpm-dip/rd-validation-service/commit/bb4fcec462646881bcca8c1f75beab0925e2ba22))
+
 ## [1.1.0](https://github.com/dnpm-dip/rd-validation-service/compare/v1.0.4...v1.1.0) (2025-10-10)
 
 
