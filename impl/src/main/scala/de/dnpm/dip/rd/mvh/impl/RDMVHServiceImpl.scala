@@ -3,14 +3,17 @@ package de.dnpm.dip.rd.mvh.impl
 
 import scala.concurrent.Future
 import cats.Monad
+import de.dnpm.dip.service.Distribution
 import de.dnpm.dip.service.mvh.{
   BaseMVHService,
+  Report,
   Repository,
   UseCase
 }
 import de.dnpm.dip.rd.mvh.api.{
   RDMVHService,
-  RDMVHServiceProvider
+  RDMVHServiceProvider,
+  RDReport
 }
 import de.dnpm.dip.rd.model.RDPatientRecord
 
@@ -40,4 +43,32 @@ extends BaseMVHService(
   repo
 )
 with RDMVHService
+{
 
+  override def report(
+    criteria: Report.Criteria
+  )(
+    implicit env: Monad[Future]
+  ): Future[RDReport] =  
+    env.map(
+      baseReport(criteria)
+    ){
+      case (report,submissions) =>
+
+        val familyControlLevels =
+          submissions.flatMap(_.record.diagnoses.map(_.familyControlLevel.code.enumValue).toList)
+
+        RDReport(
+          report.site,
+          report.createdAt,
+          report.quarter,
+          report.period,
+          report.useCase,
+          report.submissionTypes,
+          Distribution.of(familyControlLevels),
+          report.consentRevocations
+        )
+
+    }
+
+}
