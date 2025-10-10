@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/dnpm-dip/rd-validation-service/compare/v1.0.4...v1.1.0) (2025-10-10)
+
+
+### Features
+
+* Added implementation for (quarterly) MVH reporting ([0934b25](https://github.com/dnpm-dip/rd-validation-service/commit/0934b2543419683012905ff95fdb151f24e5c7a0))
+
 ## [1.0.4](https://github.com/dnpm-dip/rd-validation-service/compare/v1.0.3...v1.0.4) (2025-09-08)
 
 
