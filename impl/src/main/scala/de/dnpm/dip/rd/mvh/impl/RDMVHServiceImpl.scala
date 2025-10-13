@@ -56,7 +56,7 @@ with RDMVHService
       case (report,submissions) =>
 
         val familyControlLevels =
-          submissions.flatMap(_.record.diagnoses.map(_.familyControlLevel.code.enumValue).toList)
+          submissions.flatMap(_.record.diagnoses.toList.flatMap(_.familyControlLevel.map(_.code.enumValue)))
 
         RDReport(
           report.site,

@@ -15,6 +15,7 @@ import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.icd.ICD10GM
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.model.Patient
+import de.dnpm.dip.service.mvh.extensions._
 import de.dnpm.dip.service.validation.{
   Issue,
   Validators
@@ -65,9 +66,12 @@ trait RDValidators extends Validators
 
 
   implicit def diagnosisValidator(
-    implicit patient: Patient
-  ): Validator[Issue,RDDiagnosis] =
+    implicit record: RDPatientRecord
+  ): Validator[Issue,RDDiagnosis] = {
     diagnosis =>
+
+      implicit val patient = record.patient
+
       (
         validate(diagnosis.patient) at "Patient",
         (diagnosis.codes.map(_.system) must contain (allOf (Coding.System.UriSet[RDDiagnosis.Systems].values))) orElse (
@@ -76,9 +80,16 @@ trait RDValidators extends Validators
           Error("Es muss ein ICD-10-GM, Orphanet und Alpha-ID-SE-Code definiert sein, oder als Grund explizit angegeben sein, dass kein passender code existiert")
         ) andThen (
           _ => validateEach(diagnosis.codes)
-        ) at "Diagnose-Codes"
+        ) at "Diagnose-Codes",
+        (
+          if (record.mvhSequencingReports.nonEmpty)
+            diagnosis.familyControlLevel must be (defined) otherwise (Error("Fehlende Angabe zum Sequenzierungs-Umfang (single,duo,trio), obwohl Sequenzierung durchgeführt wurde"))
+          else
+            diagnosis.familyControlLevel must be (undefined) otherwise (Error("Fehler: Sequenzierungs-Umfang angegeben (single,duo,trio), obwohl keine Sequenzierung durchgeführt wurde"))
+        ) at "Diagnose 'FamilyControlLevel'"
       )
       .errorsOr(diagnosis) on diagnosis
+  }
 
 
   implicit def hpoTermValidator(
@@ -161,13 +172,15 @@ trait RDValidators extends Validators
 
   val patientRecordValidator: Validator[Issue,RDPatientRecord] =
     PatientRecordValidator[RDPatientRecord] combineWith {
-      record =>
+      implicit record =>
     
         implicit val patient =
           record.patient
    
         implicit val ngsReports =
           record.ngsReports.getOrElse(List.empty)
+
+//        implicit val mvhCarePlan = record.mvhCarePlan
 
         implicit val recommendations =
           record.getCarePlans
