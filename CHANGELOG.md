@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/dnpm-dip/rd-validation-service/compare/v1.1.1...v1.1.2) (2025-10-13)
+
+
+### Bug Fixes
+
+* Adapted validation rules for optional Diagnosis.familyControlLevel ([2a7090d](https://github.com/dnpm-dip/rd-validation-service/commit/2a7090dcc261458398a4201f6257a0a6f8eba399))
+* Upgraded dependency versions for service-base, model and generators ([2a7090d](https://github.com/dnpm-dip/rd-validation-service/commit/2a7090dcc261458398a4201f6257a0a6f8eba399))
+
 ## [1.1.1](https://github.com/dnpm-dip/rd-validation-service/compare/v1.1.0...v1.1.1) (2025-10-10)
 
 
