@@ -8,6 +8,7 @@ import de.dnpm.dip.service.mvh.{
   BaseMVHService,
   Report,
   Repository,
+  Submission,
   UseCase
 }
 import de.dnpm.dip.rd.mvh.api.{
@@ -44,6 +45,14 @@ extends BaseMVHService(
 )
 with RDMVHService
 {
+
+  import de.dnpm.dip.service.mvh.extensions._
+
+  override def sequenceTypes(
+    record: RDPatientRecord
+  ): Option[Set[Submission.SequenceType.Value]] =
+    Option.when(record.mvhSequencingReports.nonEmpty)(Set(Submission.SequenceType.DNA))
+
 
   override def report(
     criteria: Report.Criteria

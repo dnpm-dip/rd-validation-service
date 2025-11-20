@@ -1,7 +1,7 @@
 package de.dnpm.dip.rd.validation.impl
 
 
-import java.time.LocalDate
+import java.time.YearMonth
 import de.dnpm.dip.coding.Code
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.model.Patient
@@ -13,7 +13,7 @@ trait Invalidators
 
   def invalidate(patient: Patient) =
     patient.copy(
-      birthDate = LocalDate.now.minusYears(135)
+      birthDate = YearMonth.now.minusYears(135)
     )
 
   def invalidate(diag: RDDiagnosis): RDDiagnosis =
