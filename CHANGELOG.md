@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.6](https://github.com/dnpm-dip/rd-validation-service/compare/v1.1.5...v1.1.6) (2025-12-15)
+
+
+### Bug Fixes
+
+* bump service-base to 1.2.2 ([e9f43c1](https://github.com/dnpm-dip/rd-validation-service/commit/e9f43c1b4be0365c0096592afb7a268232267f84))
+
 ## [1.1.5](https://github.com/dnpm-dip/rd-validation-service/compare/v1.1.4...v1.1.5) (2025-12-15)
 
 
