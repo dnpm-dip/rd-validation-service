@@ -5,8 +5,8 @@ import scala.util.Properties.envOrElse
 
 name := "rd-validation-service"
 ThisBuild / organization := "de.dnpm.dip"
-ThisBuild / scalaVersion := "2.13.16"
-ThisBuild / version      := envOrElse("VERSION","1.1.1-SNAPSHOT")
+ThisBuild / scalaVersion := "2.13.18"
+ThisBuild / version      := envOrElse("VERSION","1.2.1-SNAPSHOT")
 
 val ownerRepo  = envOrElse("REPOSITORY","dnpm-dip/rd-validation-service").split("/")
 ThisBuild / githubOwner      := ownerRepo(0)
@@ -69,17 +69,17 @@ lazy val impl = project
 lazy val dependencies =
   new {
     val scalatest      = "org.scalatest"  %% "scalatest"              % "3.2.19" % Test
-    val service_base   = "de.dnpm.dip"    %% "service-base"           % "1.2.3"
-    val rd_model       = "de.dnpm.dip"    %% "rd-dto-model"           % "1.1.2"
-    val rd_generators  = "de.dnpm.dip"    %% "rd-dto-generators"      % "1.1.2" % Test
-    val icd10gm        = "de.dnpm.dip"    %% "icd10gm-impl"           % "1.1.2" % Test
-    val icd_catalogs   = "de.dnpm.dip"    %% "icd-claml-packaged"     % "1.1.2" % Test
-    val hgnc           = "de.dnpm.dip"    %% "hgnc-gene-set-impl"     % "1.1.0" % Test
-    val hpo            = "de.dnpm.dip"    %% "hp-ontology"            % "1.1.0" % Test
-    val orphanet       = "de.dnpm.dip"    %% "orphanet-ordo"          % "1.1.0" % Test
-    val alpha_id_se    = "de.dnpm.dip"    %% "alpha-id-se"            % "1.1.0" % Test
-    val atc_impl       = "de.dnpm.dip"    %% "atc-impl"               % "1.1.0" % Test
-    val atc_catalogs   = "de.dnpm.dip"    %% "atc-catalogs-packaged"  % "1.1.0" % Test
+    val service_base   = "de.dnpm.dip"    %% "service-base"           % "1.3.0"
+    val rd_model       = "de.dnpm.dip"    %% "rd-dto-model"           % "1.2.0"
+    val rd_generators  = "de.dnpm.dip"    %% "rd-dto-generators"      % "1.2.0" % Test
+    val icd10gm        = "de.dnpm.dip"    %% "icd10gm-impl"           % "1.1.3" % Test
+    val icd_catalogs   = "de.dnpm.dip"    %% "icd-claml-packaged"     % "1.1.3" % Test
+    val hgnc           = "de.dnpm.dip"    %% "hgnc-gene-set-impl"     % "1.1.2" % Test
+    val hpo            = "de.dnpm.dip"    %% "hp-ontology"            % "1.2.0" % Test
+    val orphanet       = "de.dnpm.dip"    %% "orphanet-ordo"          % "1.2.0" % Test
+    val alpha_id_se    = "de.dnpm.dip"    %% "alpha-id-se"            % "1.2.0" % Test
+    val atc_impl       = "de.dnpm.dip"    %% "atc-impl"               % "1.1.1" % Test
+    val atc_catalogs   = "de.dnpm.dip"    %% "atc-catalogs-packaged"  % "1.1.1" % Test
   }
 
 

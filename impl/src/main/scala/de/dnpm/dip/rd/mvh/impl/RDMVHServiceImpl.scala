@@ -17,7 +17,7 @@ import de.dnpm.dip.rd.mvh.api.{
   RDReport
 }
 import de.dnpm.dip.rd.model.RDPatientRecord
-
+import de.dnpm.dip.rd.model.RDDiagnosis.FamilyControlLevel
 
 
 class RDMVHServiceProviderImpl extends RDMVHServiceProvider
@@ -53,6 +53,21 @@ with RDMVHService
   ): Option[Set[Submission.SequenceType.Value]] =
     Option.when(record.mvhSequencingReports.nonEmpty)(Set(Submission.SequenceType.DNA))
 
+
+  /**
+   * Return the maximum FamilyControlLevel documented on the RDPatientRecord, if defined,
+   * mapped to Submission.DiagnosticExtent.Value
+   */
+  override def diagnosticExtent(record: RDPatientRecord): Option[Submission.DiagnosticExtent.Value] =
+    record.diagnoses.toList
+      .flatMap(_.familyControlLevel.map(_.code.enumValue))
+      .maxOption
+      .collect {
+        case FamilyControlLevel.Single => Submission.DiagnosticExtent.SingleGenome
+        case FamilyControlLevel.Duo    => Submission.DiagnosticExtent.DuoGenome
+        case FamilyControlLevel.Trio   => Submission.DiagnosticExtent.TrioGenome
+      }
+    
 
   override def report(
     criteria: Report.Criteria

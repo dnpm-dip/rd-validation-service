@@ -48,8 +48,8 @@ trait RDValidators extends Validators
   implicit val ngsReportNode: Path.Node[RDNGSReport] =
     Path.Node("NGS-Bericht")
 
-  implicit val carePlanNode: Path.Node[RDCarePlan] =
-    Path.Node("Board-Beschluss")
+  implicit val rdRarePlanNode: Path.Node[RDCarePlan] =
+    Path.Node("SE-Board-Beschluss")
 
 
   implicit val atc: CodeSystemProvider[ATC,Id,Applicative[Id]]

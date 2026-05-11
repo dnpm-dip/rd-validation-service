@@ -9,6 +9,10 @@ import de.dnpm.dip.service.validation.{
   Issue,
   Repository
 }
+import de.dnpm.dip.model.NGSReport.Type.{ 
+  GenomeShortRead,
+  GenomeLongRead
+}
 import de.dnpm.dip.rd.model.RDPatientRecord
 import de.dnpm.dip.rd.validation.api.{
   RDValidationService,
@@ -41,6 +45,7 @@ class RDValidationServiceImpl
   private val repo: Repository[Future,Monad[Future],RDPatientRecord]
 )
 extends BaseValidationService(
+  Set(GenomeShortRead,GenomeLongRead), // Only Whole-Genome Seq. admissible for RD from now on
   validator,
   repo
 )
