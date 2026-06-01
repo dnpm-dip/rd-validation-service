@@ -47,7 +47,7 @@ class Tests extends AsyncFlatSpec with Invalidators
   "Validation of invalidated RDPatientRecord" must "have failed" in {
 
     for {
-      outcome <- (service ! Validate(DataUpload(record,None)))
+      outcome <- (service ! Validate(DataUpload(record,None),true))
 
       result <-
         outcome match {
