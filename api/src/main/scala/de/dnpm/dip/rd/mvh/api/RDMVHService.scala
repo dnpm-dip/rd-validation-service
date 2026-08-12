@@ -13,9 +13,6 @@ import de.dnpm.dip.rd.model.RDPatientRecord
 
 
 trait RDMVHService extends MVHService[Future,Monad[Future],RDPatientRecord]
-{
-  type ReportType = RDReport
-}
 
 trait RDMVHServiceProvider extends SPI[RDMVHService]
 
