@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.10](https://github.com/dnpm-dip/rd-validation-service/compare/v1.1.9...v1.1.10) (2026-08-12)
+
+
+### Bug Fixes
+
+* Bump dependencies: service-base to 1.5.0 and codesystems for tests ([#16](https://github.com/dnpm-dip/rd-validation-service/issues/16)) ([0cfb7dc](https://github.com/dnpm-dip/rd-validation-service/commit/0cfb7dc8a173aedd9ba7548d48a034f40fad68f4))
+
 ## [1.1.9](https://github.com/dnpm-dip/rd-validation-service/compare/v1.1.8...v1.1.9) (2026-06-01)
 
 
