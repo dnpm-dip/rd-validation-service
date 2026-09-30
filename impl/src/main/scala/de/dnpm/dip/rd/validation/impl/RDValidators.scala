@@ -180,8 +180,6 @@ trait RDValidators extends Validators
         implicit val ngsReports =
           record.ngsReports.getOrElse(List.empty)
 
-//        implicit val mvhCarePlan = record.mvhCarePlan
-
         implicit val recommendations =
           record.getCarePlans
             .flatMap(_.therapyRecommendations.getOrElse(List.empty))
