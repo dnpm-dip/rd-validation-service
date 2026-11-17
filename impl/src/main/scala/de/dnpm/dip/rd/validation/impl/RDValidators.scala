@@ -65,14 +65,14 @@ trait RDValidators extends Validators
 
       implicit val patient = record.patient
 
-      val codeSystems = diagnosis.codes.map(_.system).toList
+      val codingsBySystem = diagnosis.codes.toList.groupBy(_.system)
 
       (
         validate(diagnosis.patient) at "Patient",
-        (codeSystems must contain (allOf (Coding.System.UriSet[RDDiagnosis.Systems].values))) orElse (diagnosis.missingCodeReason must be (defined)) otherwise (
+        (codingsBySystem.keys must contain (allOf (Coding.System.UriSet[RDDiagnosis.Systems].values))) orElse (diagnosis.missingCodeReason must be (defined)) otherwise (
           Error("Es muss ein ICD-10-GM, Orphanet und Alpha-ID-SE-Code definiert sein, oder als Grund explizit angegeben sein, dass kein passender code existiert")
         ) andThen (
-          _ => codeSystems.size must be (codeSystems.distinct.size) otherwise (
+          _ => all (codingsBySystem.values.toList) must have (size (1)) otherwise (
             Error(s"Duplikat-Kodierung entdeckt: Pro Diagnose-Objekt darf max. 1 ICD-10-GM-, Orphanet- und Alpha-ID-SE-Code definiert sein. Unterschiedliche Diagnosen müssen als separate Diagnose-Objekte erfasst werden")
             )
         ) andThen (
@@ -80,9 +80,13 @@ trait RDValidators extends Validators
         ) at "Diagnose-Codes",
         (
           if (record.mvhSequencingReports.nonEmpty)
-            diagnosis.familyControlLevel must be (defined) otherwise (Error(s"Fehlende Angabe zum Sequenzierungs-Umfang (${RDDiagnosis.FamilyControlLevel.values.mkString(",")}), obwohl Sequenzierung durchgeführt wurde"))
+            diagnosis.familyControlLevel must be (defined) otherwise (
+              Error(s"Fehlende Angabe zum Sequenzierungs-Umfang (${RDDiagnosis.FamilyControlLevel.values.mkString(",")}), obwohl Sequenzierung durchgeführt wurde")
+            )
           else
-            diagnosis.familyControlLevel must be (undefined) otherwise (Error(s"Fehler: Sequenzierungs-Umfang angegeben (${RDDiagnosis.FamilyControlLevel.values.mkString(",")}), obwohl keine Sequenzierung durchgeführt wurde"))
+            diagnosis.familyControlLevel must be (undefined) otherwise (
+              Error(s"Fehler: Sequenzierungs-Umfang angegeben (${RDDiagnosis.FamilyControlLevel.values.mkString(",")}), obwohl keine Sequenzierung durchgeführt wurde")
+            )
         ) at "FamilyControlLevel"
       )
       .errorsOr(diagnosis) on diagnosis
