@@ -30,26 +30,19 @@ import Issue.{
 trait RDValidators extends Validators
 {
 
-  implicit val hpoTermNode: Path.Node[HPOTerm] =
-    Path.Node("HPO-Term")
+  implicit val hpoTermNode: Path.Node[HPOTerm] = Path.Node("HPO-Term")
 
-  implicit val variantNode: Path.Node[Variant] =
-    Path.Node("Variante")
+  implicit val variantNode: Path.Node[Variant] = Path.Node("Variante")
 
-  implicit val smallVariantNode: Path.Node[SmallVariant] =
-    Path.Node("Einfache-Variante")
+  implicit val smallVariantNode: Path.Node[SmallVariant] = Path.Node("Einfache-Variante")
 
-  implicit val structuralVariantNode: Path.Node[StructuralVariant] =
-    Path.Node("Struktur-Variante")
+  implicit val structuralVariantNode: Path.Node[StructuralVariant] = Path.Node("Struktur-Variante")
 
-  implicit val cnvNode: Path.Node[CopyNumberVariant] =
-    Path.Node("CNV")
+  implicit val cnvNode: Path.Node[CopyNumberVariant] = Path.Node("CNV")
 
-  implicit val ngsReportNode: Path.Node[RDNGSReport] =
-    Path.Node("NGS-Bericht")
+  implicit val ngsReportNode: Path.Node[RDNGSReport] = Path.Node("NGS-Bericht")
 
-  implicit val rdRarePlanNode: Path.Node[RDCarePlan] =
-    Path.Node("SE-Board-Beschluss")
+  implicit val rdRarePlanNode: Path.Node[RDCarePlan] = Path.Node("SE-Board-Beschluss")
 
 
   implicit val atc: CodeSystemProvider[ATC,Id,Applicative[Id]]
@@ -72,21 +65,30 @@ trait RDValidators extends Validators
 
       implicit val patient = record.patient
 
+      val codingsBySystem = diagnosis.codes.toList.groupBy(_.system)
+
       (
         validate(diagnosis.patient) at "Patient",
-        (diagnosis.codes.map(_.system) must contain (allOf (Coding.System.UriSet[RDDiagnosis.Systems].values))) orElse (
-          diagnosis.missingCodeReason must be (defined)
-        ) otherwise (
-          Error("Es muss ein ICD-10-GM, Orphanet und Alpha-ID-SE-Code definiert sein, oder als Grund explizit angegeben sein, dass kein passender code existiert")
-        ) andThen (
-          _ => validateEach(diagnosis.codes)
-        ) at "Diagnose-Codes",
+        (
+          codingsBySystem.keys must contain (allOf (Coding.System.UriSet[RDDiagnosis.Systems].values)) orElse (diagnosis.missingCodeReason must be (defined)) otherwise (
+            Error("Es muss ein ICD-10-GM, Orphanet und Alpha-ID-SE-Code definiert sein, oder als Grund explizit angegeben sein, dass kein passender code existiert")
+          ),
+          codingsBySystem.values.toList must have (size (1)) otherwise (
+            Error(s"Duplikat-Kodierung entdeckt: Pro Diagnose-Objekt darf max. 1 ICD-10-GM-, Orphanet- und Alpha-ID-SE-Code definiert sein. Unterschiedliche Diagnosen müssen als separate Diagnose-Objekte erfasst werden")
+          ),
+          validateEach(diagnosis.codes)
+        )
+        .errorsOr(diagnosis.codes) at "Diagnose-Codes",
         (
           if (record.mvhSequencingReports.nonEmpty)
-            diagnosis.familyControlLevel must be (defined) otherwise (Error("Fehlende Angabe zum Sequenzierungs-Umfang (single,duo,trio), obwohl Sequenzierung durchgeführt wurde"))
+            diagnosis.familyControlLevel must be (defined) otherwise (
+              Error(s"Fehlende Angabe zum Sequenzierungs-Umfang (${RDDiagnosis.FamilyControlLevel.values.mkString(",")}), obwohl Sequenzierung durchgeführt wurde")
+            )
           else
-            diagnosis.familyControlLevel must be (undefined) otherwise (Error("Fehler: Sequenzierungs-Umfang angegeben (single,duo,trio), obwohl keine Sequenzierung durchgeführt wurde"))
-        ) at "Diagnose 'FamilyControlLevel'"
+            diagnosis.familyControlLevel must be (undefined) otherwise (
+              Error(s"Fehler: Sequenzierungs-Umfang angegeben (${RDDiagnosis.FamilyControlLevel.values.mkString(",")}), obwohl keine Sequenzierung durchgeführt wurde")
+            )
+        ) at "FamilyControlLevel"
       )
       .errorsOr(diagnosis) on diagnosis
   }
