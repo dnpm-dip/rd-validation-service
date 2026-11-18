@@ -69,15 +69,16 @@ trait RDValidators extends Validators
 
       (
         validate(diagnosis.patient) at "Patient",
-        (codingsBySystem.keys must contain (allOf (Coding.System.UriSet[RDDiagnosis.Systems].values))) orElse (diagnosis.missingCodeReason must be (defined)) otherwise (
-          Error("Es muss ein ICD-10-GM, Orphanet und Alpha-ID-SE-Code definiert sein, oder als Grund explizit angegeben sein, dass kein passender code existiert")
-        ) andThen (
-          _ => all (codingsBySystem.values.toList) must have (size (1)) otherwise (
+        (
+          codingsBySystem.keys must contain (allOf (Coding.System.UriSet[RDDiagnosis.Systems].values)) orElse (diagnosis.missingCodeReason must be (defined)) otherwise (
+            Error("Es muss ein ICD-10-GM, Orphanet und Alpha-ID-SE-Code definiert sein, oder als Grund explizit angegeben sein, dass kein passender code existiert")
+          ),
+          codingsBySystem.values.toList must have (size (1)) otherwise (
             Error(s"Duplikat-Kodierung entdeckt: Pro Diagnose-Objekt darf max. 1 ICD-10-GM-, Orphanet- und Alpha-ID-SE-Code definiert sein. Unterschiedliche Diagnosen müssen als separate Diagnose-Objekte erfasst werden")
-            )
-        ) andThen (
-          _ => validateEach(diagnosis.codes)
-        ) at "Diagnose-Codes",
+          ),
+          validateEach(diagnosis.codes)
+        )
+        .errorsOr(diagnosis.codes) at "Diagnose-Codes",
         (
           if (record.mvhSequencingReports.nonEmpty)
             diagnosis.familyControlLevel must be (defined) otherwise (
